@@ -1,0 +1,91 @@
+### Light controller main
+substitutions:
+  devicename: yardgate
+  upperDevicename: Yard gate Controller
+  # <<: !include ioMapping.yml
+
+esphome:
+  name: $devicename
+  platform: ESP32
+  board: esp32dev
+
+packages:
+  wifi: !include common/wifi.yml
+  # ethernet: !include common/ethernet.yml
+  api: !include common/api.yml
+  ota: !include common/ota.yml
+  # mqtt: !include common/mqtt.yml
+  logger: !include common/logger.yml
+  # time: !include common/time.yml
+
+web_server:
+  port: 80
+
+# i2c:
+#   scan: True
+
+# Individual outputs
+switch:
+  - platform: restart
+    name: $upperDevicename Restart
+
+  - platform: gpio
+    pin: 22
+    id: yardgaterelay
+    name: "YardGate Remote"
+    icon: "mdi:gate"
+    restore_mode: ALWAYS_OFF
+    # on_turn_on:
+    # - delay: 1000ms
+    # - switch.turn_off: yardgaterelay
+
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: 21
+      inverted: true
+    name: "YardGate click"
+
+  - platform: gpio
+    device_class: garage_door
+    name: yardGateendSwitchOpen
+    id: yardgateendswitchopen
+    pin:
+      number: 32
+      inverted: true
+    filters:
+      - delayed_on_off: 500ms
+
+  - platform: gpio
+    name: yardGateendSwitchClosed
+    id: yardgateendswitchclosed
+    pin: 
+      number: 33
+      inverted: true
+    filters:
+      - delayed_on_off: 500ms
+
+  - platform: gpio
+    name: yardGateMotion
+    id: yardgatemotion
+    pin: 
+      number: 34
+      inverted: true 
+    filters:
+      - delayed_on_off: 500ms
+
+# cover:
+#   - platform: endstop
+#     name: YardGate
+#     device_class: gate
+#     open_endstop: yardgateendswitchopen
+#     open_action:
+#       - switch.turn_on: yardgaterelay
+#     open_duration: 1min
+#     stop_action:
+#       - switch.turn_on: yardgaterelay
+#     close_endstop: yardgateendswitchclosed
+#     close_action:
+#       - switch.turn_on: yardgaterelay
+#     close_duration: 1min
+#     max_duration: 2min
