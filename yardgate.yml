@@ -1,8 +1,37 @@
+# // Expander CS pin.
+# MCP23S08CSPin 32  // IO32
+
+# // MCP23S08 Relay pins
+# REL1PIN 7 - Bus 21 - Start button
+# REL2PIN 6
+# REL3PIN 5
+# REL4PIN 4
+
+# //MCP23S08 Input pins
+# IN1PIN 3 - Bus 24 - IR curtain
+# IN2PIN 2 - Bus 21 - Start button
+# IN3PIN 1 - Bus 25 - EndStop Open
+# IN4PIN 0 - Bus 26 - EndStop Closed
+
+
+# // Status RGB LED.
+# StatusLedPixelCount 1
+# StatusLedPin 0
+# StatusLedPixelNumber 0
+# NeoPixelBus<NeoGrbFeature, NeoEsp32BitBang800KbpsMethod> _statusLed(StatusLedPixelCount, StatusLedPin);
+
+# // RS485 pins. Serial1.
+# RS485Pin      2   // IO12
+# RS485RxPin    4   // IO4
+# RS485TxPin    16  // IO16
+# RS485Transmit HIGH
+# RS485Receive  LOW
+# HardwareSerial RS485Serial(1);
+
 ### Light controller main
 substitutions:
   devicename: yardgate
   upperDevicename: Yard gate Controller
-  # <<: !include ioMapping.yml
 
 esphome:
   name: $devicename
@@ -14,15 +43,22 @@ packages:
   # ethernet: !include common/ethernet.yml
   api: !include common/api.yml
   ota: !include common/ota.yml
-  # mqtt: !include common/mqtt.yml
+  mqtt: !include common/mqtt.yml
   logger: !include common/logger.yml
-  # time: !include common/time.yml
+  time: !include common/time.yml
 
 web_server:
   port: 80
 
-# i2c:
-#   scan: True
+spi:
+  clk_pin: GPIO18
+  mosi_pin: GPIO23
+  miso_pin: GPIO19
+
+mcp23s08:
+  - id: 'mcp23s08_hub'
+    cs_pin: 32
+    deviceaddress: 0
 
 # Individual outputs
 switch:
@@ -30,47 +66,53 @@ switch:
     name: $upperDevicename Restart
 
   - platform: gpio
-    pin: 22
+    pin: 
+      mcp23xxx: mcp23s08_hub 
+      number: 7
+      inverted: false
     id: yardgaterelay
     name: "YardGate Remote"
     icon: "mdi:gate"
     restore_mode: ALWAYS_OFF
-    # on_turn_on:
-    # - delay: 1000ms
-    # - switch.turn_off: yardgaterelay
+    on_turn_on:
+    - delay: 500ms
+    - switch.turn_off: yardgaterelay
 
 binary_sensor:
   - platform: gpio
-    pin: 
-      number: 21
-      inverted: true
+    name: yardGateMotion
+    id: yardgatemotion
+    pin:
+      mcp23xxx: mcp23s08_hub
+      number: 3
+      inverted: false
+    filters:
+      - delayed_on_off: 500ms
+
+  - platform: gpio
+    pin:
+      mcp23xxx: mcp23s08_hub
+      number: 2
+      inverted: false
     name: "YardGate click"
 
   - platform: gpio
-    device_class: garage_door
-    name: yardGateendSwitchOpen
-    id: yardgateendswitchopen
+    name: yardGateEndSwitchOpen
+    id: yardgateEndswitchopen
     pin:
-      number: 32
-      inverted: true
+      mcp23xxx: mcp23s08_hub
+      number: 1
+      inverted: false
     filters:
       - delayed_on_off: 500ms
 
   - platform: gpio
-    name: yardGateendSwitchClosed
-    id: yardgateendswitchclosed
-    pin: 
-      number: 33
-      inverted: true
-    filters:
-      - delayed_on_off: 500ms
-
-  - platform: gpio
-    name: yardGateMotion
-    id: yardgatemotion
-    pin: 
-      number: 34
-      inverted: true 
+    name: yardGateEndSwitchClosed
+    id: yardgateEndswitchclosed
+    pin:
+      mcp23xxx: mcp23s08_hub
+      number: 0
+      inverted: false
     filters:
       - delayed_on_off: 500ms
 
