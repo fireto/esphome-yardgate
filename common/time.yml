@@ -2,5 +2,5 @@
 time:
   - platform: sntp
     timezone: !secret timezone
-    servers: 0.pool.ntp.org
+    servers: bg.pool.ntp.org
     id: esptime

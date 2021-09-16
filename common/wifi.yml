@@ -1,7 +1,9 @@
 # Enable wifi
 wifi:
-  ssid: !secret sfCommonWifiSsid
-  password: !secret sfCommonWifiPwd
+  ssid: !secret vnBorovetsSashoSsid
+  password: !secret vnBorovetsSashoPwd
+  # ssid: !secret vnCommonWifiSsid
+  # password: !secret vnCommonWifiPwd
   
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
