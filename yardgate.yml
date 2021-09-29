@@ -85,7 +85,7 @@ binary_sensor:
     pin:
       mcp23xxx: mcp23s08_hub
       number: 3
-      inverted: false
+      inverted: true
     filters:
       - delayed_on_off: 500ms
 
@@ -97,24 +97,26 @@ binary_sensor:
     name: "YardGate click"
 
   - platform: gpio
-    name: yardGateEndSwitchOpen
-    id: yardgateEndswitchopen
-    pin:
-      mcp23xxx: mcp23s08_hub
-      number: 1
-      inverted: false
-    filters:
-      - delayed_on_off: 500ms
-
-  - platform: gpio
     name: yardGateEndSwitchClosed
     id: yardgateEndswitchclosed
     pin:
       mcp23xxx: mcp23s08_hub
-      number: 0
-      inverted: false
+      number: 1
+      inverted: true
     filters:
       - delayed_on_off: 500ms
+
+  - platform: gpio
+    name: yardGateEndSwitchOpen
+    id: yardgateEndswitchopen
+    pin:
+      mcp23xxx: mcp23s08_hub
+      number: 0
+      inverted: true
+    filters:
+      - delayed_on_off: 500ms
+
+
 
 # cover:
 #   - platform: endstop
