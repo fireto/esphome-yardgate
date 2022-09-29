@@ -1,7 +1,7 @@
 # Enable wifi
 wifi:
-  ssid: !secret vnBorovetsSashoSsid
-  password: !secret vnBorovetsSashoPwd
+  ssid: !secret vnAutomationWifiSsid
+  password: !secret vnAutomationWifiPwd
   # ssid: !secret vnCommonWifiSsid
   # password: !secret vnCommonWifiPwd
   
