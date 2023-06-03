@@ -1,3 +1,8 @@
+# Deployed on PRODINo ESP32EX board
+# https://kmpelectronics.eu/shop/prodino-esp32ex/
+# board schematics: https://kmpelectronics.eu/wp-content/uploads/2019/12/ProDINoESP32-ETHv02-Schematic.pdf
+# flashing example: https://kmpelectronics.eu/tutorials-examples/prodino-esp32-versions-tutorial/
+
 # // Expander CS pin.
 # MCP23S08CSPin 32  // IO32
 
@@ -28,7 +33,7 @@
 # RS485Receive  LOW
 # HardwareSerial RS485Serial(1);
 
-### Light controller main
+### Yardgate controller main
 substitutions:
   devicename: yardgate
   upperDevicename: Yard gate Controller
@@ -38,6 +43,7 @@ esphome:
   platform: ESP32
   board: esp32dev
 
+# Include common configurations. comment out ones not required.
 packages:
   wifi: !include common/wifi.yml
   # ethernet: !include common/ethernet.yml
@@ -48,11 +54,13 @@ packages:
   time: !include common/time.yml
   web_server: !include common/webserver.yml
 
+# configure SPI bus pins 
 spi:
   clk_pin: GPIO18
   mosi_pin: GPIO23
   miso_pin: GPIO19
 
+# enable MCP23S08 parallel I/O expansion board https://esphome.io/components/mcp23sxx
 mcp23s08:
   - id: 'mcp23s08_hub'
     cs_pin: 32
@@ -76,7 +84,9 @@ switch:
     - delay: 500ms
     - switch.turn_off: yardgaterelay
 
+# Individual inputs
 binary_sensor:
+  # detect IR fence sensor active
   - platform: gpio
     name: yardGateMotion
     id: yardgatemotion
@@ -87,13 +97,16 @@ binary_sensor:
     filters:
       - delayed_on_off: 500ms
 
+  # detect gate opened by external system (remote "clics")
   - platform: gpio
     pin:
       mcp23xxx: mcp23s08_hub
       number: 2
       inverted: false
     name: "YardGate click"
+    id: yardgateClick
 
+  # detect endstop switch for gate closed  
   - platform: gpio
     name: yardGateEndSwitchClosed
     id: yardgateEndswitchclosed
@@ -104,6 +117,7 @@ binary_sensor:
     filters:
       - delayed_on_off: 500ms
 
+  # detect endstop switch for gate open    
   - platform: gpio
     name: yardGateEndSwitchOpen
     id: yardgateEndswitchopen
@@ -119,6 +133,7 @@ sensor:
   - platform: wifi_signal
     name: $upperDevicename wifi signal
     update_interval: 60s
+
   # calculate uptime in human readable format
   - platform: uptime
     name: Uptime Sensor
@@ -150,18 +165,23 @@ text_sensor:
     id: uptime_human
     icon: mdi:clock-start
 
-# cover:
-#   - platform: endstop
-#     name: YardGate
-#     device_class: gate
-#     open_endstop: yardgateendswitchopen
-#     open_action:
-#       - switch.turn_on: yardgaterelay
-#     open_duration: 1min
-#     stop_action:
-#       - switch.turn_on: yardgaterelay
-#     close_endstop: yardgateendswitchclosed
-#     close_action:
-#       - switch.turn_on: yardgaterelay
-#     close_duration: 1min
-#     max_duration: 2min
+# esphome feedback cover documentation: https://esphome.io/components/cover/feedback.html    
+cover:
+  - platform: feedback
+    name: YardGate
+    device_class: gate
+    has_built_in_endstop: true
+    
+    open_action:
+      - switch.turn_on: yardgaterelay
+    open_endstop: yardgateEndswitchopen
+    open_duration: 45sec
+
+    stop_action:
+      - switch.turn_on: yardgaterelay
+    
+    close_action:
+      - switch.turn_on: yardgaterelay
+    close_endstop: yardgateEndswitchclosed
+    close_duration: 45sec
+    max_duration: 2min
