@@ -47,7 +47,7 @@ esphome:
 packages:
   wifi: !include common/wifi.yml
   # ethernet: !include common/ethernet.yml
-  # api: !include common/api.yml
+  api: !include common/api.yml
   ota: !include common/ota.yml
   mqtt: !include common/mqtt.yml
   logger: !include common/logger.yml
