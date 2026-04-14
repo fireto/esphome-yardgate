@@ -2,8 +2,8 @@
 wifi:
   ssid: !secret vnAutomationWifiSsid
   password: !secret vnAutomationWifiPwd
-  # ssid: !secret vnCommonWifiSsid
-  # password: !secret vnCommonWifiPwd
+  fast_connect: True
+  domain: $domainName
   
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
