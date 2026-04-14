@@ -37,11 +37,16 @@
 substitutions:
   devicename: yardgate
   upperDevicename: Yard gate Controller
+  domainName: '.vn.fireto.net'   # domain name for the microcontroller
 
 esphome:
   name: $devicename
-  platform: ESP32
+
+esp32:
   board: esp32dev
+  framework:
+        type: esp-idf
+
 
 # Include common configurations. comment out ones not required.
 packages:
@@ -49,11 +54,14 @@ packages:
   # ethernet: !include common/ethernet.yml
   api: !include common/api.yml
   ota: !include common/ota.yml
-  mqtt: !include common/mqtt.yml
+  # mqtt: !include common/mqtt.yml
   logger: !include common/logger.yml
   time: !include common/time.yml
   web_server: !include common/webserver.yml
 
+mdns:
+  disabled: true
+  
 # configure SPI bus pins 
 spi:
   clk_pin: GPIO18
@@ -67,10 +75,11 @@ mcp23s08:
     deviceaddress: 0
 
 # Individual outputs
-switch:
+button:
   - platform: restart
     name: $upperDevicename Restart
 
+switch:
   - platform: gpio
     pin: 
       mcp23xxx: mcp23s08_hub 
@@ -97,12 +106,12 @@ binary_sensor:
     filters:
       - delayed_on_off: 500ms
 
-  # detect gate opened by external system (remote "clics")
+  # detect gate opened by external system (remote "clicks")
   - platform: gpio
     pin:
       mcp23xxx: mcp23s08_hub
       number: 2
-      inverted: false
+      inverted: true
     name: "YardGate click"
     id: yardgateClick
 
@@ -113,7 +122,7 @@ binary_sensor:
     pin:
       mcp23xxx: mcp23s08_hub
       number: 1
-      inverted: true
+      inverted: false
     filters:
       - delayed_on_off: 500ms
 
@@ -124,7 +133,7 @@ binary_sensor:
     pin:
       mcp23xxx: mcp23s08_hub
       number: 0
-      inverted: true
+      inverted: false
     filters:
       - delayed_on_off: 500ms
 
@@ -134,36 +143,13 @@ sensor:
     name: $upperDevicename wifi signal
     update_interval: 60s
 
-  # calculate uptime in human readable format
-  - platform: uptime
-    name: Uptime Sensor
-    id: uptime_sensor
-    update_interval: 60s
-    internal: true
-    on_raw_value:
-      then:
-        - text_sensor.template.publish:
-            id: uptime_human
-            state: !lambda |-
-              int seconds = round(id(uptime_sensor).raw_state);
-              int days = seconds / (24 * 3600);
-              seconds = seconds % (24 * 3600);
-              int hours = seconds / 3600;
-              seconds = seconds % 3600;
-              int minutes = seconds /  60;
-              seconds = seconds % 60;
-              return (
-                (days ? String(days) + "d " : "") +
-                (hours ? String(hours) + "h " : "") +
-                (minutes ? String(minutes) + "m " : "") +
-                (String(seconds) + "s")
-              ).c_str();
-      
-text_sensor:
-  - platform: template
-    name: $upperDevicename Uptime Human Readable
-    id: uptime_human
-    icon: mdi:clock-start
+# text_sensor:
+#   - platform: template
+#     name: $upperDevicename Uptime Human Readable
+#     id: uptime_human
+#     icon: mdi:clock-start
+  # - platform: version
+  #   name: "$upperDevicename ESPHome Version"
 
 # esphome feedback cover documentation: https://esphome.io/components/cover/feedback.html    
 cover:
