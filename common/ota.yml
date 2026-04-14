@@ -1,3 +1,5 @@
 # Enable Over The Air updates
 ota:
-  password: !secret otaPwd
+  - platform: esphome
+    id: yardGate
+    password: !secret otaPwd
