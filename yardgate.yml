@@ -15,8 +15,8 @@
 # //MCP23S08 Input pins
 # IN1PIN 3 - Bus 24 - IR curtain
 # IN2PIN 2 - Bus 21 - Start button
-# IN3PIN 1 - Bus 25 - EndStop Open
-# IN4PIN 0 - Bus 26 - EndStop Closed
+# IN3PIN 1 - Bus 25 - EndStop Closed
+# IN4PIN 0 - Bus 26 - EndStop Open
 
 
 # // Status RGB LED.
@@ -41,6 +41,10 @@ substitutions:
 
 esphome:
   name: $devicename
+  on_boot:
+  - priority: 1000
+    then:
+      - logger.set_level: WARN 
 
 esp32:
   board: esp32dev
@@ -114,6 +118,8 @@ binary_sensor:
       inverted: true
     name: "YardGate click"
     id: yardgateClick
+    filters:
+      - delayed_on_off: 100ms
 
   # detect endstop switch for gate closed  
   - platform: gpio
@@ -155,6 +161,7 @@ sensor:
 cover:
   - platform: feedback
     name: YardGate
+    id: yardgate_cover
     device_class: gate
     has_built_in_endstop: true
     
